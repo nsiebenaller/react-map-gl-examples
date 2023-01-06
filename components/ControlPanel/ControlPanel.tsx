@@ -1,29 +1,37 @@
 import React from "react";
-import * as mapControls from "@/lib/mapControls";
+import { useAtom } from "jotai";
+import { mapAtom, mapCursorAtom, mapDrawAtom } from "@/lib/mapStore";
 
 const ControlPanel = () => {
+	const [map] = useAtom(mapAtom);
+	const [mapDraw] = useAtom(mapDrawAtom);
+	const [, setMapCursor] = useAtom(mapCursorAtom);
+
 	const onMoveClick = () => {
 		// Ask permission from the user to find their location
 		navigator.geolocation.getCurrentPosition((position) => {
-			mapControls.move({
-				longitude: position.coords.longitude,
-				latitude: position.coords.latitude,
-				zoom: 10,
-			});
+			const { longitude, latitude } = position.coords;
+			map?.setCenter([longitude, latitude]);
+			map?.setZoom(10);
 		});
 	};
 	const onFlyClick = () => {
 		// Ask permission from the user to find their location
 		navigator.geolocation.getCurrentPosition((position) => {
-			mapControls.flyTo({
-				longitude: position.coords.longitude,
-				latitude: position.coords.latitude,
+			const { longitude, latitude } = position.coords;
+			map?.flyTo({
+				center: [longitude, latitude],
 				zoom: 10,
 			});
 		});
 	};
 	const onDrawClick = () => {
-		mapControls.drawPolygon();
+		setMapCursor("crosshair");
+		mapDraw?.changeMode("draw_polygon");
+	};
+	const onLogLayers = () => {
+		console.log(map?.getStyle().layers);
+		console.log(mapDraw?.getAll());
 	};
 	return (
 		<div
@@ -43,6 +51,7 @@ const ControlPanel = () => {
 			<button onClick={onMoveClick}>Find me! {"(move)"}</button>
 			<button onClick={onFlyClick}>Find me! {"(fly)"}</button>
 			<button onClick={onDrawClick}>Draw</button>
+			<button onClick={onLogLayers}>Log Layers</button>
 		</div>
 	);
 };

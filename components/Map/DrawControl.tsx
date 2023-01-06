@@ -1,7 +1,8 @@
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import React from "react";
-import { ControlPosition, MapRef, useControl } from "react-map-gl";
-import { EVENTS } from "@/lib/mapControls";
+import { ControlPosition, useControl } from "react-map-gl";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import { useAtom } from "jotai";
+import { mapDrawAtom } from "@/lib/mapStore";
 
 type DrawLayer = {
 	geometry: any;
@@ -12,17 +13,25 @@ type DrawLayer = {
 
 type DrawControlProps = ConstructorParameters<typeof MapboxDraw>[0] & {
 	position?: ControlPosition;
-
 	onCreate?: (evt: { features: DrawLayer[] }) => void;
 	onUpdate?: (evt: { features: DrawLayer[]; action: string }) => void;
 	onDelete?: (evt: { features: DrawLayer[] }) => void;
 };
 
 const DrawControl = (props: DrawControlProps) => {
-	const mapboxDrawRef = React.useRef(new MapboxDraw(props));
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const mapDraw = React.useMemo(() => new MapboxDraw(props), []);
+	const [, setMapDraw] = useAtom(mapDrawAtom);
+
+	React.useEffect(() => {
+		setMapDraw(mapDraw);
+		return () => {
+			setMapDraw(null);
+		};
+	}, [setMapDraw, mapDraw]);
 
 	useControl<MapboxDraw>(
-		() => mapboxDrawRef.current,
+		() => mapDraw,
 		({ map }: { map: any }) => {
 			map.on("draw.create", props.onCreate);
 			map.on("draw.update", props.onUpdate);
@@ -34,16 +43,6 @@ const DrawControl = (props: DrawControlProps) => {
 			map.off("draw.delete", props.onDelete);
 		}
 	);
-
-	React.useEffect(() => {
-		const onDrawPolygon = () => {
-			mapboxDrawRef.current.changeMode("draw_polygon");
-		};
-		document.addEventListener(EVENTS.DRAW_POLYGON, onDrawPolygon);
-		return () => {
-			document.removeEventListener(EVENTS.DRAW_POLYGON, onDrawPolygon);
-		};
-	}, []);
 
 	return null;
 };
