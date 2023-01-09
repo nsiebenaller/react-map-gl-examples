@@ -8,6 +8,7 @@ import useEventHandlers, { DRAWN_LAYER_IDS } from "./useEventHandlers";
 
 type Props = {
 	initialViewState?: Partial<ViewState>;
+	children?: React.ReactNode;
 };
 const Map = (props: Props) => {
 	const [viewState, setViewState] = React.useState(props.initialViewState);
@@ -37,6 +38,7 @@ const Map = (props: Props) => {
 				onUpdate={console.log}
 				onDelete={console.log}
 			/>
+			{props.children}
 		</MapGL>
 	);
 };

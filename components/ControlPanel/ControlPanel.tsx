@@ -1,6 +1,7 @@
 import React from "react";
 import { useAtom } from "jotai";
 import { mapAtom, mapCursorAtom, mapDrawAtom } from "@/lib/mapStore";
+import PositionDisplay from "./PositionDisplay";
 
 const ControlPanel = () => {
 	const [map] = useAtom(mapAtom);
@@ -39,6 +40,7 @@ const ControlPanel = () => {
 				position: "absolute",
 				top: "10px",
 				left: "10px",
+				width: "200px",
 				padding: "8px 16px",
 				boxShadow: "0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)",
 				borderRadius: "4px",
@@ -48,6 +50,7 @@ const ControlPanel = () => {
 				rowGap: "6px",
 			}}
 		>
+			<PositionDisplay />
 			<button onClick={onMoveClick}>Find me! {"(move)"}</button>
 			<button onClick={onFlyClick}>Find me! {"(fly)"}</button>
 			<button onClick={onDrawClick}>Draw</button>
